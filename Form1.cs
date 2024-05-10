@@ -78,8 +78,9 @@ namespace FixedPartitionSimulation
             double panelWidth = memoryRAMPanel.Width;
             double heightOfPanels = panelHeight / noProcesses;
             double memoryUsable = memoryRAM - 50;
+            int[] partitionSizes = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
 
-            decimal partitionSizes = (decimal)memoryUsable / (decimal)noProcesses;
+            decimal partitionSizes2 = (decimal)memoryUsable / (decimal)noProcesses;
 
             for (int i = 0; i < noProcesses; i++)
             {
@@ -88,7 +89,8 @@ namespace FixedPartitionSimulation
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Margin = new Padding(0);
                 Label partitionLabel = new Label();
-                partitionSizes = Math.Round(partitionSizes, 2);
+                partitionLabel.Text = $"{partitionSizes[i]} KB";
+                //partitionSizes = Math.Round(partitionSizes2 , 2);
                 partitionLabel.Text = $"{partitionSizes} KB";
                 partitionLabel.AutoSize = true;
                 partitionLabel.Dock = DockStyle.Fill;
