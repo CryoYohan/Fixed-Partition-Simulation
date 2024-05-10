@@ -81,9 +81,6 @@ namespace FixedPartitionSimulation
             double panelWidth = memoryRAMPanel.Width;
             double memoryUsable = memoryRAM - 50;
 
-            int[] partitionSizes2 = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
-
-
             int[] noPartitionsChoices = { noProcesses - 1, noProcesses, noProcesses - 2 };
             int randomIndex = random.Next(0, 3);
             int newNoProcesses = noPartitionsChoices[randomIndex];
@@ -166,23 +163,6 @@ namespace FixedPartitionSimulation
 
             // Display the message in a MessageBox
             MessageBox.Show(message, "Data Grid Content");
-        }
-
-        private int[] GenerateRandomPartitionSizes(int totalMemoryUsable, int noProcesses)
-        {
-            int[] partitionSizes = new int[noProcesses];
-
-            for (int i = 0; i < noProcesses; i++)
-            {
-                int size = random.Next(1, totalMemoryUsable / noProcesses);
-                partitionSizes[i] = size;
-                totalMemoryUsable -= size;
-            }
-
-            // Ensure the last partition size is not zero
-            partitionSizes[noProcesses - 1] = totalMemoryUsable;
-
-            return partitionSizes;
         }
 
     }
