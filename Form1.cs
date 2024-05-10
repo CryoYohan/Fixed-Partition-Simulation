@@ -79,7 +79,7 @@ namespace FixedPartitionSimulation
             double heightOfPanels = panelHeight / noProcesses;
             double memoryUsable = memoryRAM - 50;
 
-            int[] partitionSizes = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
+            decimal partitionSizes = (decimal)memoryUsable / (decimal)noProcesses;
 
             for (int i = 0; i < noProcesses; i++)
             {
@@ -88,7 +88,8 @@ namespace FixedPartitionSimulation
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Margin = new Padding(0);
                 Label partitionLabel = new Label();
-                partitionLabel.Text = $"{partitionSizes[i]} KB";
+                partitionSizes = Math.Round(partitionSizes, 2);
+                partitionLabel.Text = $"{partitionSizes} KB";
                 partitionLabel.AutoSize = true;
                 partitionLabel.Dock = DockStyle.Fill;
                 panel.Controls.Add(partitionLabel);
@@ -96,62 +97,22 @@ namespace FixedPartitionSimulation
             }
         }
 
-        private int[] GenerateRandomPartitionSizes(int totalMemoryUsable, int noProcesses)
-        {
-            int[] partitionSizes = new int[noProcesses];
-
-            for (int i = 0; i < noProcesses; i++)
-            {
-                int size = random.Next(1, totalMemoryUsable / noProcesses);
-                partitionSizes[i] = size;
-                totalMemoryUsable -= size;
-            }
-
-            // Ensure the last partition size is not zero
-            partitionSizes[noProcesses - 1] = totalMemoryUsable;
-
-            return partitionSizes;
-        }
-
-
-        }
-
-        // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
-        private void button2_Click(object sender, EventArgs e)
-        {
-            memoryRAMPanel.Controls.Clear();
-            dataGridView1.Rows.Clear();
-            memoryRAMBox.Clear();
-            noProcessesBox.Clear();
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             dataGridView1.Hide();
         }
-        // Generate Sequence of Fixed Partitioning Algorithm
+        // Extract Data from Data Grid
         private void button3_Click(object sender, EventArgs e)
         {
-            /*if (dataGridView1.Rows.Count > 0)
-            {
-                int v = 0;
-                foreach (DataGridViewRow row in dataGridView1.Rows)
-                {
-                    //storeProcessesData(v, Convert.ToInt32(row.Cells[1].Value.ToString()), Convert.ToInt32(row.Cells[2].Value.ToString()), Convert.ToInt32(row.Cells[3].Value.ToString()));
-                }
-                v++;
-
-            }
-            messageLabel.Text = message;*/
             int rowCount = dataGridView1.RowCount;
             int columnCount = dataGridView1.ColumnCount;
             double[,] dataTable = new double[rowCount, columnCount];
-            for(int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
             {
                 DataGridViewRow row = dataGridView1.Rows[rowIndex];
-                for(int columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
                 {
-                    if(columnIndex == 0)
+                    if (columnIndex == 0)
                         dataTable[rowIndex, columnIndex] = rowIndex + 1;
                     else
                         dataTable[rowIndex, columnIndex] = Convert.ToDouble(row.Cells[columnIndex].Value.ToString());
@@ -181,47 +142,32 @@ namespace FixedPartitionSimulation
             // Display the message in a MessageBox
             MessageBox.Show(message, "Data Grid Content");
         }
-
-        private void storeProcessesData(int noProcesses, double memoryReq, int allocationTime, int completionTime)
+        // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
+        private void button2_Click(object sender, EventArgs e)
         {
-            int noElements = 5;
-            double[,] dataTable = new double[noProcesses, noElements];
-            for (int i = 0;  i < noProcesses; i++)
-            {
-                for(int k = 0; k < noElements; k++)
-                {
-                    switch (k)
-                    {
-                        case 0:
-                            dataTable[i, k] = i+1; break;
-                        case 1:
-                            dataTable[i, k] = memoryReq; break;
-                        case 2:
-                            dataTable[i, k] = allocationTime; break;
-                        case 3:
-                            dataTable[i, k] = completionTime; break;
-                    }
-                }
-            }
-            printArray(dataTable);
-        }
-        string message = "";
-        private void printArray(double[,]arr)
-        {
-           for(int i = 0; i < arr.GetLength(0); i++)
-            {
-                for(int k = 0; k < arr.GetLength(1); k++)
-                {
-                    message += arr[i, k] + "";
-                }
-                message += "\n";
-            }
-           
+            memoryRAMPanel.Controls.Clear();
+            dataGridView1.Rows.Clear();
+            memoryRAMBox.Clear();
+            noProcessesBox.Clear();
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private int[] GenerateRandomPartitionSizes(int totalMemoryUsable, int noProcesses)
         {
+            int[] partitionSizes = new int[noProcesses];
+
+            for (int i = 0; i < noProcesses; i++)
+            {
+                int size = random.Next(1, totalMemoryUsable / noProcesses);
+                partitionSizes[i] = size;
+                totalMemoryUsable -= size;
+            }
+
+            // Ensure the last partition size is not zero
+            partitionSizes[noProcesses - 1] = totalMemoryUsable;
+
+            return partitionSizes;
+        }
 
         }
     }
-}
+
