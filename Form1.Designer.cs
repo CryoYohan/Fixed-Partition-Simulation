@@ -48,6 +48,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -143,7 +145,7 @@
             this.memoryReq,
             this.alloctime,
             this.completiontime});
-            this.dataGridView1.Location = new System.Drawing.Point(93, 239);
+            this.dataGridView1.Location = new System.Drawing.Point(16, 239);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.Size = new System.Drawing.Size(440, 283);
             this.dataGridView1.TabIndex = 9;
@@ -227,6 +229,27 @@
             this.label7.TabIndex = 14;
             this.label7.Text = "(5-10 Processes)";
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(472, 467);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(88, 26);
+            this.button3.TabIndex = 15;
+            this.button3.Text = "Generate";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.label8.ForeColor = System.Drawing.SystemColors.Control;
+            this.label8.Location = new System.Drawing.Point(462, 449);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(113, 15);
+            this.label8.TabIndex = 16;
+            this.label8.Text = "Generate Algorithm";
+            // 
             // Form1
             // 
             this.AcceptButton = this.button1;
@@ -234,6 +257,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkSlateGray;
             this.ClientSize = new System.Drawing.Size(888, 519);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.button2);
@@ -247,7 +272,9 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.MaximizeBox = false;
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Fixed Partition Simulator";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -279,6 +306,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label label8;
     }
 }
 

@@ -46,6 +46,7 @@ namespace FixedPartitionSimulation
             {
                 int memoryRAM = Convert.ToInt32(memoryRAMBox.Text);
                 int noProcesses = Convert.ToInt32(noProcessesBox.Text);
+                processes = noProcesses;
                 if((memoryRAM > 5000 || memoryRAM <= 0 || memoryRAM < 1000) || (noProcesses > 10 || noProcesses <= 0 || noProcesses < 5))
                     MessageBox.Show("Invalid input", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else
@@ -93,10 +94,6 @@ namespace FixedPartitionSimulation
             }
         }
 
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
 
         // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
         private void button2_Click(object sender, EventArgs e)
@@ -110,6 +107,63 @@ namespace FixedPartitionSimulation
         private void Form1_Load(object sender, EventArgs e)
         {
             dataGridView1.Hide();
+        }
+        // Generate Sequence of Fixed Partitioning Algorithm
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.Rows.Count > 0)
+            {
+                int v = 0;
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    storeProcessesData(v, Convert.ToInt32(row.Cells[1].Value.ToString()), Convert.ToInt32(row.Cells[2].Value.ToString()), Convert.ToInt32(row.Cells[3].Value.ToString()));
+                }
+                v++;
+
+            }
+            MessageBox.Show(message, "Fixed Partition", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        
+        private void storeProcessesData(int noProcesses, double memoryReq, int allocationTime, int completionTime)
+        {
+            int noElements = 5;
+            double[,] dataTable = new double[noProcesses, noElements];
+            for (int i = 0;  i < noProcesses; i++)
+            {
+                for(int k = 0; k < noElements; k++)
+                {
+                    switch (k)
+                    {
+                        case 0:
+                            dataTable[i, k] = i+1; break;
+                        case 1:
+                            dataTable[i, k] = memoryReq; break;
+                        case 2:
+                            dataTable[i, k] = allocationTime; break;
+                        case 3:
+                            dataTable[i, k] = completionTime; break;
+                    }
+                }
+            }
+            printArray(dataTable);
+        }
+        string message = "";
+        private void printArray(double[,]arr)
+        {
+           for(int i = 0; i < arr.GetLength(0); i++)
+            {
+                for(int k = 0; k < arr.GetLength(1); k++)
+                {
+                    message = arr[i, k] + "";
+                }
+                message = "\n";
+            }
+           
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
