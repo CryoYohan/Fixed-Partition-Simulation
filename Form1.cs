@@ -111,19 +111,56 @@ namespace FixedPartitionSimulation
         // Generate Sequence of Fixed Partitioning Algorithm
         private void button3_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.Rows.Count > 0)
+            /*if (dataGridView1.Rows.Count > 0)
             {
                 int v = 0;
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    storeProcessesData(v, Convert.ToInt32(row.Cells[1].Value.ToString()), Convert.ToInt32(row.Cells[2].Value.ToString()), Convert.ToInt32(row.Cells[3].Value.ToString()));
+                    //storeProcessesData(v, Convert.ToInt32(row.Cells[1].Value.ToString()), Convert.ToInt32(row.Cells[2].Value.ToString()), Convert.ToInt32(row.Cells[3].Value.ToString()));
                 }
                 v++;
 
             }
-            MessageBox.Show(message, "Fixed Partition", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            messageLabel.Text = message;*/
+            int rowCount = dataGridView1.RowCount;
+            int columnCount = dataGridView1.ColumnCount;
+            double[,] dataTable = new double[rowCount, columnCount];
+            for(int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            {
+                DataGridViewRow row = dataGridView1.Rows[rowIndex];
+                for(int columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                {
+                    if(columnIndex == 0)
+                        dataTable[rowIndex, columnIndex] = rowIndex + 1;
+                    else
+                        dataTable[rowIndex, columnIndex] = Convert.ToDouble(row.Cells[columnIndex].Value.ToString());
+                }
+            }
+            string message = "";
+
+            for (int rowIndex = 0; rowIndex < dataTable.GetLength(0); rowIndex++)
+            {
+                // Create a string for the current row
+                string rowString = "";
+                for (int columnIndex = 0; columnIndex < dataTable.GetLength(1); columnIndex++)
+                {
+                    rowString += dataTable[rowIndex, columnIndex] + " ";
+                }
+
+                // Remove the trailing space from the row string
+                rowString = rowString.TrimEnd();
+
+                // Add the row string to the message with a newline
+                message += rowString + "\n";
+            }
+
+            // Remove the trailing newline from the message (optional)
+            message = message.TrimEnd('\n');
+
+            // Display the message in a MessageBox
+            MessageBox.Show(message, "Data Grid Content");
         }
-        
+
         private void storeProcessesData(int noProcesses, double memoryReq, int allocationTime, int completionTime)
         {
             int noElements = 5;
@@ -154,9 +191,9 @@ namespace FixedPartitionSimulation
             {
                 for(int k = 0; k < arr.GetLength(1); k++)
                 {
-                    message = arr[i, k] + "";
+                    message += arr[i, k] + "";
                 }
-                message = "\n";
+                message += "\n";
             }
            
         }
