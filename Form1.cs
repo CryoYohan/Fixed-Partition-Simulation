@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Design;
+using System.Globalization;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace FixedPartitionSimulation
@@ -41,23 +45,32 @@ namespace FixedPartitionSimulation
                 MessageBox.Show("Fields cannot be empty", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
             {
-                int memoryRAM = Convert.ToInt32(memoryRAMBox.Text);
-                int noProcesses = Convert.ToInt32(noProcessesBox.Text);
-                processes = noProcesses;
-                if (memoryRAM > 5000)
-                    MessageBox.Show("RAM Size Exceeded Maximum RAM Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if (memoryRAM <= 0 || memoryRAM < 1000)//)
-                    MessageBox.Show("RAM Size does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if(noProcesses > 10)
-                    MessageBox.Show("Exceeded Maximum Processes Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if (noProcesses <= 0 || noProcesses < 5)
-                    MessageBox.Show("No. of Processes does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else
+                int memoryRAM = 0, noProcesses = 0;
+                try
                 {
-                    dataGridView1.Show();
-                    fillTable(noProcesses);
-                    configureMemoryPartitions(memoryRAM, noProcesses);
+                    memoryRAM = Convert.ToInt32(memoryRAMBox.Text);
+                    noProcesses = Convert.ToInt32(noProcessesBox.Text);
+                    processes = noProcesses;
+                    if (memoryRAM > 5000)
+                        MessageBox.Show("RAM Size Exceeded Maximum RAM Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    else if (memoryRAM <= 0 || memoryRAM < 1000)
+                        MessageBox.Show("RAM Size does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    else if (noProcesses > 10)
+                        MessageBox.Show("Exceeded Maximum Processes Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    else if (noProcesses <= 0 || noProcesses < 5)
+                        MessageBox.Show("No. of Processes does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    else
+                    {
+                        dataGridView1.Show();
+                        fillTable(noProcesses);
+                        configureMemoryPartitions(memoryRAM, noProcesses);
+                    }
                 }
+                catch(Exception)
+                {
+                    MessageBox.Show("Invalid Input", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                
             }
         }
 
@@ -126,8 +139,92 @@ namespace FixedPartitionSimulation
                 }
             }
             checkDataExtracted(dataTable);
+            findShortestAllocationTime(dataTable);
+        }
+        // Find the shortest allocation time Process
+        private void findShortestAllocationTime(double[,] dataTable)
+        {
+            int shortestAllocTimeIndex = 0;
+            double currentShortestAllocTime;
+            for (int rowIndex = 0; rowIndex < dataTable.GetLength(0) - 1; rowIndex++)
+            {
 
+                if (dataTable[(rowIndex), 2] > dataTable[(rowIndex + 1), 2])
+                {
+                    currentShortestAllocTime = dataTable[(rowIndex + 1), 2];
+                    shortestAllocTimeIndex = rowIndex + 1;
+                }
+            }
+            MessageBox.Show("Shortest Allocation time is P" + dataTable[shortestAllocTimeIndex, 0]);
+            allocateProcess(dataTable, shortestAllocTimeIndex,1);
 
+        }
+        // Allocate Process to a Partition
+        private void allocateProcess(double[,] dataTable, int rowIndex, int columnIndex)
+        {
+            List<double> partitionMemorySizes = new List<double>();
+            foreach(Panel panels in addedPanels)
+            {
+                Label label = panels.Controls.OfType<Label>().FirstOrDefault();
+
+                if (label != null)
+                {
+                    partitionMemorySizes.Add(Convert.ToDouble(label.Text.ToString()));
+                }
+            }
+            double processMemory = dataTable[rowIndex, columnIndex];
+            for(int i = 0; i < partitionMemorySizes.Count; i++)
+            {
+                if (partitionMemorySizes[i] > processMemory)
+                {
+                    double panelHeights = addedPanels[i].Height;
+                    double percentage = Math.Round((processMemory / panelHeights), 2);
+                    addedPanels[i].Invoke(new Action(() =>
+                    {
+                        double panelWidth = addedPanels[i].Width;
+                        double panelHeight = addedPanels[i].Height;
+
+                        // Calculate Height Colored Section
+                        double coloredHeight = panelHeight * percentage;
+
+                        // Use Control.CreateGraphics() for drawing
+                        using (Graphics g = addedPanels[i].CreateGraphics())
+                        {
+                            g.FillRectangle(Brushes.Green, 0, 0, (int)panelWidth, (int)coloredHeight);
+                        }
+                    }));
+                    //paintPanel(addedPanels[i], percentage);
+                }
+            }
+        }
+
+        // Paint Process Allocation
+       /* private void paintPanel(Panel panel, double percentage)
+        {
+            panelHeight = added
+            // Calculate Height Colored Section
+            double coloredHeight = panelHeight * percentage;
+            // Draw Color
+            addedPanels[i].Invoke(new Action(() =>
+            {
+                double panelWidth = addedPanels[i].Width;
+                double panelHeight = addedPanels[i].Height;
+
+                // Calculate Height Colored Section
+                double coloredHeight = panelHeight * percentage;
+
+                // Use Control.CreateGraphics() for drawing
+                using (Graphics g = addedPanels[i].CreateGraphics())
+                {
+                    g.FillRectangle(Brushes.Green, 0, 0, (int)panelWidth, (int)coloredHeight);
+                }
+            }));
+
+        }*/
+
+        private void newSortedArray(int rowIndex, int columnIndex, double[,] dataTable)
+        {
+            double[,] newSortedAllocationTimme = new double[dataTable.GetLength(0), dataTable.GetLength(1)];
         }
         // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
         private void button2_Click(object sender, EventArgs e)
