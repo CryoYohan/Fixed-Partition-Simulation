@@ -15,7 +15,9 @@ namespace FixedPartitionSimulation
     {
         private int timer = 0;
         private const int kernel = 50;
-        private int RAM, processes; 
+        private int RAM, processes;
+        private Random random = new Random();
+
         public Form1()
         {
             InitializeComponent();
@@ -46,7 +48,7 @@ namespace FixedPartitionSimulation
             {
                 int memoryRAM = Convert.ToInt32(memoryRAMBox.Text);
                 int noProcesses = Convert.ToInt32(noProcessesBox.Text);
-                if((memoryRAM > 5000 || memoryRAM <= 0 || memoryRAM < 1000) || (noProcesses > 10 || noProcesses <= 0 || noProcesses < 5))
+                if ((memoryRAM > 5000 || memoryRAM <= 0 || memoryRAM < 1000) || (noProcesses > 10 || noProcesses <= 0 || noProcesses < 5))
                     MessageBox.Show("Invalid input", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else
                 {
@@ -55,9 +57,8 @@ namespace FixedPartitionSimulation
                     configureMemoryPartitions(memoryRAM, noProcesses);
                 }
             }
-            
-
         }
+
         // Allocate the Process ID's in the table
         private void fillTable(int processes)
         {
@@ -67,6 +68,7 @@ namespace FixedPartitionSimulation
                 dataGridView1.Rows.Add(processId); // Add a new row with the process ID
             }
         }
+
         private void configureMemoryPartitions(int memoryRAM, int noProcesses)
         {
             memoryRAMPanel.Margin = new Padding(0); // Set zero margin for no spacing
@@ -75,7 +77,8 @@ namespace FixedPartitionSimulation
             double panelWidth = memoryRAMPanel.Width;
             double heightOfPanels = panelHeight / noProcesses;
             double memoryUsable = memoryRAM - 50;
-            decimal partitionSizes = (decimal)memoryUsable / (decimal)noProcesses;
+
+            int[] partitionSizes = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
 
             for (int i = 0; i < noProcesses; i++)
             {
@@ -84,8 +87,7 @@ namespace FixedPartitionSimulation
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Margin = new Padding(0);
                 Label partitionLabel = new Label();
-                partitionSizes = Math.Round(partitionSizes, 2);
-                partitionLabel.Text = $"{partitionSizes} KB";
+                partitionLabel.Text = $"{partitionSizes[i]} KB";
                 partitionLabel.AutoSize = true;
                 partitionLabel.Dock = DockStyle.Fill;
                 panel.Controls.Add(partitionLabel);
@@ -93,10 +95,28 @@ namespace FixedPartitionSimulation
             }
         }
 
+        private int[] GenerateRandomPartitionSizes(int totalMemoryUsable, int noProcesses)
+        {
+            int[] partitionSizes = new int[noProcesses];
+
+            for (int i = 0; i < noProcesses; i++)
+            {
+                int size = random.Next(1, totalMemoryUsable / noProcesses);
+                partitionSizes[i] = size;
+                totalMemoryUsable -= size;
+            }
+
+            // Ensure the last partition size is not zero
+            partitionSizes[noProcesses - 1] = totalMemoryUsable;
+
+            return partitionSizes;
+        }
+
         private void label2_Click(object sender, EventArgs e)
         {
 
         }
+
 
         // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
         private void button2_Click(object sender, EventArgs e)
