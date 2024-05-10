@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FixedPartitionSimulation
@@ -42,15 +37,21 @@ namespace FixedPartitionSimulation
         // Proceed to Table Button
         private void button1_Click(object sender, EventArgs e)
         {
-            if (memoryRAMBox.Text == "" && noProcessesBox.Text == "")
+            if (memoryRAMBox.Text == "" || noProcessesBox.Text == "")
                 MessageBox.Show("Fields cannot be empty", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
             {
                 int memoryRAM = Convert.ToInt32(memoryRAMBox.Text);
                 int noProcesses = Convert.ToInt32(noProcessesBox.Text);
                 processes = noProcesses;
-                if((memoryRAM > 5000 || memoryRAM <= 0 || memoryRAM < 1000) || (noProcesses > 10 || noProcesses <= 0 || noProcesses < 5))
-                    MessageBox.Show("Invalid input", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (memoryRAM > 5000)
+                    MessageBox.Show("RAM Size Exceeded Maximum RAM Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else if (memoryRAM <= 0 || memoryRAM < 1000)//)
+                    MessageBox.Show("RAM Size does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else if(noProcesses > 10)
+                    MessageBox.Show("Exceeded Maximum Processes Requirement!", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else if (noProcesses <= 0 || noProcesses < 5)
+                    MessageBox.Show("No. of Processes does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 else
                 {
                     dataGridView1.Show();
@@ -83,8 +84,8 @@ namespace FixedPartitionSimulation
             int[] partitionSizes2 = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
 
 
-            int[] noPartitionsChoices = { noProcesses - 1, noProcesses, noProcesses - 2};
-            int randomIndex = random.Next(0,3);
+            int[] noPartitionsChoices = { noProcesses - 1, noProcesses, noProcesses - 2 };
+            int randomIndex = random.Next(0, 3);
             int newNoProcesses = noPartitionsChoices[randomIndex];
             double heightOfPanels = panelHeight / newNoProcesses;
             decimal partitionSizes = (decimal)memoryUsable / (decimal)newNoProcesses;
@@ -97,12 +98,12 @@ namespace FixedPartitionSimulation
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Margin = new Padding(0);
                 Label partitionLabel = new Label();
-                partitionSizes = Math.Round(partitionSizes , 2);
+                partitionSizes = Math.Round(partitionSizes, 2);
                 partitionLabel.Text = $"{partitionSizes.ToString()} KB";
                 partitionLabel.AutoSize = true;
                 panel.Controls.Add(partitionLabel);
                 memoryRAMPanel.Controls.Add(panel);
-                addedPanels.Add(panel);
+                addedPanels.Add(panel); // every added panel is added to a List, so it can be tracked later
             }
         }
 
@@ -127,6 +128,21 @@ namespace FixedPartitionSimulation
                         dataTable[rowIndex, columnIndex] = Convert.ToDouble(row.Cells[columnIndex].Value.ToString());
                 }
             }
+            checkDataExtracted(dataTable);
+
+
+        }
+        // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
+        private void button2_Click(object sender, EventArgs e)
+        {
+            memoryRAMPanel.Controls.Clear();
+            dataGridView1.Rows.Clear();
+            memoryRAMBox.Clear();
+            noProcessesBox.Clear();
+        }
+
+        private void checkDataExtracted(double[,] dataTable)
+        {
             string message = "";
 
             for (int rowIndex = 0; rowIndex < dataTable.GetLength(0); rowIndex++)
@@ -151,14 +167,6 @@ namespace FixedPartitionSimulation
             // Display the message in a MessageBox
             MessageBox.Show(message, "Data Grid Content");
         }
-        // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
-        private void button2_Click(object sender, EventArgs e)
-        {
-            memoryRAMPanel.Controls.Clear();
-            dataGridView1.Rows.Clear();
-            memoryRAMBox.Clear();
-            noProcessesBox.Clear();
-        }
 
         private int[] GenerateRandomPartitionSizes(int totalMemoryUsable, int noProcesses)
         {
@@ -177,6 +185,6 @@ namespace FixedPartitionSimulation
             return partitionSizes;
         }
 
-        }
     }
+}
 
