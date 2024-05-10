@@ -70,32 +70,39 @@ namespace FixedPartitionSimulation
             }
         }
 
+        // List to store added panels from For Loop below
+        List<Panel> addedPanels = new List<Panel>();
         private void configureMemoryPartitions(int memoryRAM, int noProcesses)
         {
             memoryRAMPanel.Margin = new Padding(0); // Set zero margin for no spacing
             memoryRAMPanel.Padding = new Padding(0);
             double panelHeight = memoryRAMPanel.Height;
             double panelWidth = memoryRAMPanel.Width;
-            double heightOfPanels = panelHeight / noProcesses;
             double memoryUsable = memoryRAM - 50;
-            int[] partitionSizes = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
 
-            decimal partitionSizes2 = (decimal)memoryUsable / (decimal)noProcesses;
+            int[] partitionSizes2 = GenerateRandomPartitionSizes((int)memoryUsable, noProcesses);
 
-            for (int i = 0; i < noProcesses; i++)
+
+            int[] noPartitionsChoices = { noProcesses - 1, noProcesses, noProcesses - 2};
+            int randomIndex = random.Next(0,3);
+            int newNoProcesses = noPartitionsChoices[randomIndex];
+            double heightOfPanels = panelHeight / newNoProcesses;
+            decimal partitionSizes = (decimal)memoryUsable / (decimal)newNoProcesses;
+
+
+            for (int i = 0; i < newNoProcesses; i++)
             {
                 Panel panel = new Panel();
                 panel.Size = new Size((int)panelWidth, (int)heightOfPanels);
                 panel.BorderStyle = BorderStyle.FixedSingle;
                 panel.Margin = new Padding(0);
                 Label partitionLabel = new Label();
-                partitionLabel.Text = $"{partitionSizes[i]} KB";
-                //partitionSizes = Math.Round(partitionSizes2 , 2);
-                partitionLabel.Text = $"{partitionSizes} KB";
+                partitionSizes = Math.Round(partitionSizes , 2);
+                partitionLabel.Text = $"{partitionSizes.ToString()} KB";
                 partitionLabel.AutoSize = true;
-                partitionLabel.Dock = DockStyle.Fill;
                 panel.Controls.Add(partitionLabel);
                 memoryRAMPanel.Controls.Add(panel);
+                addedPanels.Add(panel);
             }
         }
 
