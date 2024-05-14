@@ -38,10 +38,6 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.label4 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.processID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.memoryReq = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.alloctime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.completiontime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.memoryRAMPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
@@ -50,6 +46,10 @@
             this.label7 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
+            this.processID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.memoryReq = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.alloctime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.completiontime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -126,11 +126,11 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.label4.ForeColor = System.Drawing.SystemColors.Control;
-            this.label4.Location = new System.Drawing.Point(270, 80);
+            this.label4.Location = new System.Drawing.Point(709, 18);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(38, 15);
+            this.label4.Size = new System.Drawing.Size(49, 20);
             this.label4.TabIndex = 8;
             this.label4.Text = "00:00";
             // 
@@ -150,26 +150,6 @@
             this.dataGridView1.TabIndex = 9;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            // 
-            // processID
-            // 
-            this.processID.HeaderText = "Process ID";
-            this.processID.Name = "processID";
-            // 
-            // memoryReq
-            // 
-            this.memoryReq.HeaderText = "Memory Requirement";
-            this.memoryReq.Name = "memoryReq";
-            // 
-            // alloctime
-            // 
-            this.alloctime.HeaderText = "Allocation Time";
-            this.alloctime.Name = "alloctime";
-            // 
-            // completiontime
-            // 
-            this.completiontime.HeaderText = "Completion Time";
-            this.completiontime.Name = "completiontime";
             // 
             // memoryRAMPanel
             // 
@@ -249,6 +229,26 @@
             this.label8.TabIndex = 16;
             this.label8.Text = "Generate Algorithm";
             // 
+            // processID
+            // 
+            this.processID.HeaderText = "Process ID";
+            this.processID.Name = "processID";
+            // 
+            // memoryReq
+            // 
+            this.memoryReq.HeaderText = "Memory Requirement";
+            this.memoryReq.Name = "memoryReq";
+            // 
+            // alloctime
+            // 
+            this.alloctime.HeaderText = "Allocation Time";
+            this.alloctime.Name = "alloctime";
+            // 
+            // completiontime
+            // 
+            this.completiontime.HeaderText = "Process Time";
+            this.completiontime.Name = "completiontime";
+            // 
             // Form1
             // 
             this.AcceptButton = this.button1;
@@ -295,10 +295,6 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn processID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn memoryReq;
-        private System.Windows.Forms.DataGridViewTextBoxColumn alloctime;
-        private System.Windows.Forms.DataGridViewTextBoxColumn completiontime;
         private System.Windows.Forms.FlowLayoutPanel memoryRAMPanel;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label5;
@@ -307,6 +303,10 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.DataGridViewTextBoxColumn processID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn memoryReq;
+        private System.Windows.Forms.DataGridViewTextBoxColumn alloctime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn completiontime;
     }
 }
 
