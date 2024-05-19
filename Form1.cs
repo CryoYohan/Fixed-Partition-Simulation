@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Timer = System.Threading.Timer;
@@ -20,11 +21,9 @@ namespace FixedPartitionSimulation
 {
     public partial class Form1 : Form
     {
-        private int timer = 0;
         private const int kernel = 50;
         private int RAM, processes;
         private Random random = new Random();
-        private bool timerBool = false;
 
         public Form1()
         {
@@ -38,28 +37,7 @@ namespace FixedPartitionSimulation
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (startTimer() == true)
-            {
-                timer++;
-                label4.Text = Convert.ToString(timer);
-                if (timer == 5)
-                {
-                    MessageBox.Show("Five seconds in");
-                }
-            }
-           
-        }
-        private void setTimer(bool timerBool)
-        {
-            this.timerBool = timerBool;
-        }
-        private bool startTimer()
-        {
-            if (timerBool == true)
-                return true;
-            else
-                return false;
-           
+
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -90,10 +68,8 @@ namespace FixedPartitionSimulation
                         MessageBox.Show("No. of Processes does not meet the minimum requirement", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     else
                     {
-                        dataGridView1.Show();
                         fillTable(noProcesses);
                         configureMemoryPartitions(memoryRAM, noProcesses);
-                        //storeMemoryKBinList();
                     }
                 }
                 catch(Exception)
@@ -155,28 +131,35 @@ namespace FixedPartitionSimulation
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            dataGridView1.Hide();
+
         }
+
         // Extract Data from Data Grid
         private void button3_Click(object sender, EventArgs e)
         {
             int rowCount = dataGridView1.RowCount;
             int columnCount = dataGridView1.ColumnCount;
             double[,] dataTable = new double[rowCount, columnCount];
-           
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            try
             {
-                DataGridViewRow row = dataGridView1.Rows[rowIndex];
-                for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
                 {
-                    if (columnIndex == 0)
-                        dataTable[rowIndex, columnIndex] = rowIndex + 1;
-                    else
-                        dataTable[rowIndex, columnIndex] = Convert.ToDouble(row.Cells[columnIndex].Value.ToString());
+                    DataGridViewRow row = dataGridView1.Rows[rowIndex];
+                    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                    {
+                        if (columnIndex == 0)
+                            dataTable[rowIndex, columnIndex] = rowIndex + 1;
+                        else
+                            dataTable[rowIndex, columnIndex] = Convert.ToDouble(row.Cells[columnIndex].Value.ToString());
+                    }
                 }
+                findShortestAllocationTime(dataTable);
             }
-            checkDataExtracted(dataTable);
-            findShortestAllocationTime(dataTable);
+            catch (Exception)
+            {
+                MessageBox.Show("Invalid Input Detected! Please enter the correct values.", "Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+          
         }
 
         // Find the shortest allocation time Process
@@ -205,19 +188,14 @@ namespace FixedPartitionSimulation
             foreach (Process process in processes)
             {
                 executedProcesses.Add(process);
-                MessageBox.Show($"Shortest Allocation time is P{process.ProcessId} with an allocation time of {process.AllocationTime}"); // Display results progressively
+                //MessageBox.Show($"Shortest Allocation time is P{process.ProcessId} with an allocation time of {process.AllocationTime}"); // Display results progressively
             }
 
-            // Display the sequence of executed processes
-            MessageBox.Show("Sequence of executed processes:");
-            foreach (Process process in executedProcesses)
-            {
-                MessageBox.Show(process.ToString()); // Use ToString() for formatted output
-            }
             allocateProcess(executedProcesses, dataTable);
 
 
         }
+        Thread thread;
         // Allocate Process to a Partition
         private void allocateProcess(List<Process> executedProcesses,double[,] dataTable)
         {
@@ -249,8 +227,7 @@ namespace FixedPartitionSimulation
             double panelHeight = addedPanels[0].Height;
             double panelWidth = addedPanels[0].Width;
             double fixedSizePartition = partitionMemorySizes[0];
-            MessageBox.Show(fixedSizePartition.ToString());
-            Thread thread = new Thread(() => Countdown(panelHeight, panelWidth,partitionMemorySizes, fixedSizePartition, labelList));
+            thread = new Thread(() => Countdown(panelHeight, panelWidth,partitionMemorySizes, fixedSizePartition, labelList, executedProcesses));
             thread.Start();
         }
 
@@ -266,11 +243,12 @@ namespace FixedPartitionSimulation
                 label.Text = timer.ToString(); // Update directly if on UI thread
             }
         }
+        List<Process> allocatedProcesses = new List<Process>();
         // Countdown
-        private void Countdown( double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList)
+        private void Countdown( double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList, List<Process> executedProcesses)
         {
-           int processes = 0;
-           int timer = 0;
+            int processesCompleted = 0;
+            int timer = 0;
            setLabelInThread(label4, timer);
             while (true)
             {
@@ -278,25 +256,42 @@ namespace FixedPartitionSimulation
                 {
                     if(process.AllocationTime == timer)
                     {
-                        paintPanel(process, panelHeight, panelWidth, partitionMemorySizes, fixedPartition, labelList);
-                    }
-                    if(returnCompletionTime(process) == timer)
-                    {
-                        unpaintPanel(process, panelHeight, panelWidth, partitionMemorySizes, fixedPartition, labelList);
-                        processes++;
+                        int i = 0;
+                        foreach (Double pms in partitionMemorySizes)
+                        {
+                            if (pms < fixedPartition)
+                                i++;
+                        }
+                        if (i == partitionMemorySizes.Count)
+                        {
+                            process.AllocationTime++;
+                            waitingProcesses.Invoke(new Action(() => waitingProcesses.Text += $"P{process.ProcessId} is waiting at {timer} ms...\n"));
+                        }
+                        else
+                        {
+                            paintPanel(process, panelHeight, panelWidth, partitionMemorySizes, fixedPartition, labelList, timer);
+                        }
+                        
                     }
                     
+                    else if (returnCompletionTime(process) == timer)
+                    {
+                        unpaintPanel(process, panelHeight, panelWidth, partitionMemorySizes, fixedPartition, labelList, timer);
+                        processesCompleted++; // if naa gali bug kani ibalhin sa else paintpanel babaw ani na condition
+
+                    }
+
                 }
-                if (processes == executedProcesses.Count)
+                if (processesCompleted == executedProcesses.Count)
                 {
-                    Thread.Sleep(5000);
-                    MessageBox.Show("All Process Allocated!");
+                    Thread.Sleep(3000); 
+                    MessageBox.Show("All Process Allocated!","Fixed Partition Simulator", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     break; 
                 }
                     
                 else
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(2000); // interval for seconds
                     timer++;
                     setLabelInThread(label4, timer);
                 }
@@ -315,7 +310,7 @@ namespace FixedPartitionSimulation
             label.Text = partitionSize.ToString();
         }
         // Paint a panel that indicates a process being allocated in a memory partition
-        private void paintPanel(Process process, double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList)
+        private void paintPanel(Process process, double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList, int timer)
         {
             int counter = 0;
             foreach(Panel panel in addedPanels)
@@ -336,20 +331,25 @@ namespace FixedPartitionSimulation
                         }
                         partitionMemorySizes[counter] -= process.MemoryRequirement;
                         labelList[counter].Text = $"{partitionMemorySizes[counter]}KB | P{process.ProcessId}";
+                        waitingProcesses.Invoke(new Action(() => waitingProcesses.Text += $"P{process.ProcessId} is allocated at {timer} ms\n"));
+                        process.isDenied = false;
+                        allocatedProcesses.Add(process);
                     }));                   
                     break;
 
                 }
                 else if(process.MemoryRequirement > fixedPartition)
                 {
-                    MessageBox.Show($"Process {process.ProcessId} is denied, too big");
+                    MessageBox.Show($"Process {process.ProcessId} is denied, too big", "Fixed Partition", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    waitingProcesses.Invoke(new Action(() => waitingProcesses.Text += $"P{process.ProcessId} is denied at {timer} ms\n"));
+                    process.isDenied = true;
                     break;
                 }
                 counter++;
             }
 
         }
-        private void unpaintPanel(Process process, double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList)
+        private void unpaintPanel(Process process, double panelHeight, double panelWidth, List<double> partitionMemorySizes, double fixedPartition, List<System.Windows.Forms.Label> labelList, int timer)
         {
             int counter = 0;
             foreach (Panel panel in addedPanels)
@@ -362,10 +362,12 @@ namespace FixedPartitionSimulation
                         // Use Control.CreateGraphics() for drawing
                         using (Graphics g = panel.CreateGraphics())
                         {
-                            g.FillRectangle(Brushes.Khaki, 0, 0, (int)panelWidth, (int)panelHeight);
+                            g.FillRectangle(Brushes.Gold, 0, 0, (int)panelWidth, (int)panelHeight);
                         }
                         partitionMemorySizes[counter] += process.MemoryRequirement;
                         labelList[counter].Text = $"{partitionMemorySizes[counter]}KB";
+                        if(process.isDenied == false)
+                            waitingProcesses.Invoke(new Action(() => waitingProcesses.Text += $"P{process.ProcessId} is completed at {timer} ms\n"));
                     }));
                     break;
                 }
@@ -378,37 +380,20 @@ namespace FixedPartitionSimulation
         // Reset Computer Button to Reconfigure new Partitions for the Memory(RAM)
         private void button2_Click(object sender, EventArgs e)
         {
+            addedPanels.Clear();
             memoryRAMPanel.Controls.Clear();
             dataGridView1.Rows.Clear();
             memoryRAMBox.Clear();
             noProcessesBox.Clear();
+            waitingProcesses.Text = "";
+            label4.Text = "0";
+            executedProcesses.Clear();
+
         }
 
-        private void checkDataExtracted(double[,] dataTable)
+        private void waitingProcesses_Click(object sender, EventArgs e)
         {
-            string message = "";
 
-            for (int rowIndex = 0; rowIndex < dataTable.GetLength(0); rowIndex++)
-            {
-                // Create a string for the current row
-                string rowString = "";
-                for (int columnIndex = 0; columnIndex < dataTable.GetLength(1); columnIndex++)
-                {
-                    rowString += dataTable[rowIndex, columnIndex] + " ";
-                }
-
-                // Remove the trailing space from the row string
-                rowString = rowString.TrimEnd();
-
-                // Add the row string to the message with a newline
-                message += rowString + "\n";
-            }
-
-            // Remove the trailing newline from the message (optional)
-            message = message.TrimEnd('\n');
-
-            // Display the message in a MessageBox
-            MessageBox.Show(message, "Data Grid Content");
         }
 
     }
@@ -419,6 +404,8 @@ namespace FixedPartitionSimulation
         public double AllocationTime { get; set; }
         public double MemoryRequirement { get; set; }
         public double CompletionTime { get; set; }
+
+        public bool isDenied {  get; set; } 
 
         public override string ToString() // Optional for formatted output
         {
